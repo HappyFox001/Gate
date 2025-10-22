@@ -45,11 +45,19 @@ def inject_ib_gates(
     gates = nn.ModuleList()
 
     for layer_idx, block in enumerate(blocks):
-        if not hasattr(block, "ffn"):
-            raise ValueError(f"Transformer block at index {layer_idx} has no 'ffn' attribute to wrap.")
+        target_attr = None
+        for candidate in ("ffn", "mlp"):
+            if hasattr(block, candidate):
+                target_attr = candidate
+                break
+        if target_attr is None:
+            raise ValueError(
+                f"Transformer block at index {layer_idx} has neither 'ffn' nor 'mlp' attribute to wrap."
+            )
+        original_module = getattr(block, target_attr)
         gate = TokenGate(hidden_size=hidden_size, epsilon=epsilon)
         gates.append(gate)
-        block.ffn = GatedFeedForward(block.ffn, gate)
+        setattr(block, target_attr, GatedFeedForward(original_module, gate))
 
     return gates
 
