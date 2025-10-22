@@ -26,25 +26,6 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def _tokenize_dataset(
-    split: Dataset,
-    tokenizer,
-    block_size: int,
-) -> Dataset:
-    """
-    Tokenises and chunks text into constant-length blocks without shuffling.
-    """
-
-    def tokenize_function(examples):
-        return tokenizer(examples["text"], add_special_tokens=False)
-
-    tokenized = split.map(
-        tokenize_function,
-        batched=True,
-        remove_columns=split.column_names,
-        load_from_cache_file=False,
-    )
-
     def group_texts(examples):
         concatenated = sum(examples["input_ids"], [])
         total_length = (len(concatenated) // block_size) * block_size
@@ -59,8 +40,10 @@ def _tokenize_dataset(
     chunked = tokenized.map(
         group_texts,
         batched=True,
+        remove_columns=tokenized.column_names,
         load_from_cache_file=False,
     )
+    chunked = chunked.filter(lambda example: len(example["input_ids"]) == block_size)
     return chunked
 
 
