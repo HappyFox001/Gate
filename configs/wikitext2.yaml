@@ -1,0 +1,49 @@
+seed: 42
+model_name: distilgpt2
+max_length: 1024
+train_dataset:
+  name: wikitext
+  subset: wikitext-2-raw-v1
+  split: train
+validation_dataset:
+  name: wikitext
+  subset: wikitext-2-raw-v1
+  split: validation
+test_dataset:
+  name: wikitext
+  subset: wikitext-2-raw-v1
+  split: test
+pg19_dataset:
+  name: pg19
+  split: test
+  num_documents: 128
+  min_tokens: 4096
+  max_tokens: 4096
+  eval_window: 2048
+  eval_strides: [1024]
+noise_dataset:
+  insertion_interval: 3
+  seed: 42
+  sentence_delimiter: "."
+training:
+  epochs: 5
+  gradient_accumulation_steps: 2
+  batch_size: 32
+  effective_batch_size: 64
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  lr_scheduler: cosine
+  warmup_fraction: 0.1
+  lambda_ib: 0.02
+  lambda_warmup_fraction: 0.1
+  lambda_ramp_end_fraction: 0.5
+  grad_clip: 1.0
+  mixed_precision: fp16
+  eval_interval_fraction: 0.1
+hard_pruning:
+  threshold: 0.30
+  epsilon: 1.0e-3
+metrics:
+  compression_target: 0.7
+  ppl_increase_threshold: 0.05
