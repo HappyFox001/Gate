@@ -161,7 +161,7 @@ def select_pg19_subset(
     max_tokens: int,
     num_documents: int,
 ) -> List[List[int]]:
-    dataset = load_dataset("pg19", split="test")
+    dataset = load_dataset("pg19", split="test", trust_remote_code=True)
     selected = []
     for entry in dataset:
         tokens = tokenizer(entry["text"], add_special_tokens=False)["input_ids"]
