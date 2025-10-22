@@ -1,6 +1,6 @@
 seed: 42
 model_name: distilgpt2
-max_length: 1024
+max_length: 512
 train_dataset:
   name: wikitext
   subset: wikitext-2-raw-v1

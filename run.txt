@@ -1,0 +1,1 @@
+python train_ib.py --config configs/wikitext2.yaml --output_dir runs/ib
