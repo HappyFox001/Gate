@@ -26,16 +26,31 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
+def _tokenize_dataset(split: Dataset, tokenizer, block_size: int) -> Dataset:
+    """
+    Tokenise raw text and pack into fixed-length chunks without shuffling.
+    """
+
+    def tokenize_function(examples):
+        return tokenizer(examples["text"], add_special_tokens=False)
+
+    tokenized = split.map(
+        tokenize_function,
+        batched=True,
+        remove_columns=split.column_names,
+        load_from_cache_file=False,
+    )
+
     def group_texts(examples):
         concatenated = sum(examples["input_ids"], [])
         total_length = (len(concatenated) // block_size) * block_size
         if total_length == 0:
             return {"input_ids": []}
-        result = [
+        windows = [
             concatenated[i : i + block_size]
             for i in range(0, total_length, block_size)
         ]
-        return {"input_ids": result}
+        return {"input_ids": windows}
 
     chunked = tokenized.map(
         group_texts,
@@ -54,7 +69,6 @@ def build_wikitext_splits(
     tokenizer,
     block_size: int,
 ) -> DatasetDict:
-
     def load_split(split_cfg: Dict) -> Dataset:
         dataset = load_dataset(
             split_cfg["name"],
@@ -66,7 +80,6 @@ def build_wikitext_splits(
     train = load_split(train_cfg)
     val = load_split(val_cfg)
     test = load_split(test_cfg)
-
     return DatasetDict({"train": train, "validation": val, "test": test})
 
 
