@@ -105,7 +105,13 @@ def tokenize_texts(texts: List[str], tokenizer, block_size: int) -> Dataset:
         ]
         return {"input_ids": result}
 
-    chunked = tokenized.map(group_texts, batched=True, load_from_cache_file=False)
+    chunked = tokenized.map(
+        group_texts,
+        batched=True,
+        remove_columns=tokenized.column_names,
+        load_from_cache_file=False,
+    )
+    chunked = chunked.filter(lambda example: len(example["input_ids"]) == block_size)
     return chunked
 
 

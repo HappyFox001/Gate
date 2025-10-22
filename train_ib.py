@@ -114,7 +114,11 @@ def main() -> None:
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.model_max_length = config["max_length"]
+    existing_max = getattr(tokenizer, "model_max_length", config["max_length"])
+    if existing_max is None or existing_max > 10**8:
+        tokenizer.model_max_length = config["max_length"]
+    else:
+        tokenizer.model_max_length = max(config["max_length"], existing_max)
 
     datasets = build_wikitext_splits(
         config["train_dataset"],
