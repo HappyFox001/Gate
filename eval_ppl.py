@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import torch
+import os
 from datasets import Dataset, load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -161,6 +162,7 @@ def select_pg19_subset(
     max_tokens: int,
     num_documents: int,
 ) -> List[List[int]]:
+    os.environ.setdefault("HF_DATASETS_ALLOW_CODE", "1")
     dataset = load_dataset("pg19", split="test", trust_remote_code=True)
     selected = []
     for entry in dataset:
